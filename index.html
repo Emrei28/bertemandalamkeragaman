@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lengkapi Cerita — Bahasa Indonesia Kelas 2 SD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+<!-- Library Konfeti Ringan -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+  :root {
+    --bg: #F0F7FF;
+    --card-bg: #FFFFFF;
+    --primary: #2563EB;
+    --success: #16A34A;
+    --danger: #DC2626;
+    --text: #1E293B;
+    --border: #CBD5E1;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Quicksand', sans-serif;
+    margin: 0;
+    padding: 20px 12px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 650px;
+    background: var(--card-bg);
+    padding: 24px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+  }
+
+  header { text-align: center; margin-bottom: 20px; }
+  h1 { font-family: 'Fredoka', sans-serif; color: var(--primary); margin: 0 0 6px; font-size: 1.8rem; }
+  p { margin: 0; color: #64748B; font-size: 0.95rem; font-weight: 600; }
+
+  /* Bank Kata */
+  .bank-box {
+    background: #EFF6FF;
+    border: 2px dashed #93C5FD;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+  .bank-title { font-size: 0.9rem; font-weight: 700; color: #1D4ED8; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .bank-row { display: flex; flex-wrap: wrap; gap: 10px; min-height: 40px; align-items: center; }
+  
+  /* Chip Kata */
+  .chip {
+    background: var(--primary);
+    color: #FFF;
+    padding: 4px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+  .chip.dragging { opacity: 0.3; }
+
+  /* Element Terbang / Animasi Mulus */
+  .chip-fly {
+    position: fixed !important;
+    z-index: 1500 !important;
+    margin: 0 !important;
+    transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+    pointer-events: none;
+    background: var(--primary) !important;
+    color: #FFF !important;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+  }
+
+  /* Area Soal */
+  .quiz-list { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
+  
+  .quiz-card {
+    background: #F8FAFC;
+    border: 2px solid var(--border);
+    padding: 16px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .icon { font-size: 2rem; flex-shrink: 0; }
+
+  .sentence {
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 2.2;
+    color: var(--text);
+    width: 100%;
+  }
+
+  /* Dropzone Target */
+  .dropzone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 90px;
+    height: 36px;
+    border: 2px dashed #94A3B8;
+    border-radius: 10px;
+    background: #FFFFFF;
+    color: #94A3B8;
+    font-size: 0.9rem;
+    font-weight: 700;
+    padding: 0;
+    margin: 0 4px;
+    vertical-align: middle;
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+
+  .dropzone .chip {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    box-shadow: none;
+  }
+
+  .dropzone.has-item { border-style: solid; border-color: var(--primary); background: #F0F7FF; padding: 0; }
+  
+  /* Status Benar & Salah */
+  .dropzone.correct { border-style: solid; border-color: var(--success) !important; background: #DCFCE7 !important; }
+  .dropzone.correct .chip { background: var(--success) !important; cursor: default; }
+  
+  .dropzone.wrong { border-style: solid; border-color: var(--danger) !important; background: #FEE2E2 !important; animation: shake 0.3s ease-in-out; }
+  .dropzone.wrong .chip { background: var(--danger) !important; }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+
+  /* Feedback Peringatan */
+  .result-box {
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  /* Action Buttons */
+  .action-area { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .btn {
+    border: none;
+    padding: 12px 28px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  }
+  .btn-check { background: var(--primary); color: white; }
+  .btn-reset { background: transparent; color: #64748B; text-decoration: underline; box-shadow: none; font-size: 0.9rem; }
+
+  /* Pop-up Modal Apresiasi */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 2000;
+  }
+  .modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .modal-card {
+    background: white;
+    padding: 32px 24px;
+    border-radius: 24px;
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+    transform: scale(0.8);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+  }
+  .modal-overlay.active .modal-card {
+    transform: scale(1);
+  }
+  .modal-badge { font-size: 4rem; margin-bottom: 10px; }
+  .modal-card h2 { font-family: 'Fredoka', sans-serif; color: var(--success); margin: 0 0 8px; font-size: 1.8rem; }
+  .modal-card p { color: #475569; margin: 0 0 20px; font-size: 1rem; font-weight: 600; }
+  .btn-modal { background: var(--success); color: white; width: 100%; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>✏️ Lengkapi Ceritanya!</h1>
+    <p>Tarik kata ke dalam kotak, lalu klik "Cek Jawaban".</p>
+  </header>
+
+  <!-- Bank Kata Sifat -->
+  <div class="bank-box">
+    <div class="bank-title">💡 Pilihan Kata:</div>
+    <div class="bank-row" id="word-bank"></div>
+  </div>
+
+  <!-- Soal-soal Cerita -->
+  <div class="quiz-list" id="quiz-list"></div>
+
+  <!-- Pesan Peringatan Jika Belum Lengkap -->
+  <div class="result-box" id="result-box"></div>
+
+  <div class="action-area">
+    <button class="btn btn-check" id="btn-check" onclick="cekJawaban()">✅ Cek Jawaban</button>
+    <button class="btn btn-reset" onclick="resetGameDengAnimasi()">🔄 Ulangi Game</button>
+  </div>
+</div>
+
+<!-- Pop-up Modal Apresiasi -->
+<div class="modal-overlay" id="reward-modal">
+  <div class="modal-card">
+    <div class="modal-badge">🏆🌟</div>
+    <h2>Luar Biasa!</h2>
+    <p>Hebat sekali, kamu berhasil menyelesaikan semua soal dengan benar!</p>
+    <button class="btn btn-modal" id="btn-replay" onclick="prosesMainLagi()">🎮 Main Lagi</button>
+  </div>
+</div>
+
+<script>
+const masterSoalData = [
+  {
+    id: 1,
+    emoji: '🌧️',
+    awal: 'Baju Budi basah kuyup karena hujan turun sangat',
+    jawaban: 'deras',
+    akhir: '.'
+  },
+  {
+    id: 2,
+    emoji: '🍦',
+    awal: 'Es krim ini rasanya manis dan terasa',
+    jawaban: 'dingin',
+    akhir: ' di lidah.'
+  },
+  {
+    id: 3,
+    emoji: '📚',
+    awal: 'Siti anak yang',
+    jawaban: 'rajin',
+    akhir: ', ia selalu membaca buku setiap hari.'
+  },
+  {
+    id: 4,
+    emoji: '🧹',
+    awal: 'Ruang kelas terlihat',
+    jawaban: 'bersih',
+    akhir: ' setelah disapu bersama-sama.'
+  }
+];
+
+const quizList = document.getElementById('quiz-list');
+const wordBank = document.getElementById('word-bank');
+let soalAktif = [];
+
+function acakArray(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function renderSoal() {
+  quizList.innerHTML = '';
+  soalAktif = acakArray(masterSoalData);
+
+  soalAktif.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'quiz-card';
+    card.innerHTML = `
+      <div class="icon">${item.emoji}</div>
+      <div class="sentence">
+        ${item.awal} <div class="dropzone" data-jawaban="${item.jawaban}">...</div>${item.akhir}
+      </div>
+    `;
+    quizList.appendChild(card);
+  });
+}
+
+wordBank.addEventListener('dragover', e => e.preventDefault());
+
+function inisialisasiBankKata() {
+  wordBank.innerHTML = '';
+  const kumpulJawaban = acakArray(soalAktif.map(s => s.jawaban));
+  kumpulJawaban.forEach(kata => {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.textContent = kata;
+    chip.dataset.kata = kata;
+    makeDraggable(chip);
+    wordBank.appendChild(chip);
+  });
+}
+
+function inisialisasiGame() {
+  renderSoal();
+  inisialisasiBankKata();
+}
+
+inisialisasiGame();
+
+function makeDraggable(el) {
+  el.addEventListener('pointerdown', (e) => {
+    if (el.parentElement.classList.contains('correct')) return;
+
+    resetWrongStylesOnly();
+
+    const startX = e.clientX, startY = e.clientY;
+    const clone = el.cloneNode(true);
+    
+    clone.style.position = 'fixed';
+    clone.style.left = (startX - 40) + 'px';
+    clone.style.top = (startY - 20) + 'px';
+    clone.style.zIndex = 1000;
+    clone.style.pointerEvents = 'none';
+    document.body.appendChild(clone);
+    
+    el.classList.add('dragging');
+
+    function onMove(ev) {
+      clone.style.left = (ev.clientX - 40) + 'px';
+      clone.style.top = (ev.clientY - 20) + 'px';
+    }
+
+    function onUp(ev) {
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
+      clone.remove();
+      el.classList.remove('dragging');
+
+      let dropped = false;
+
+      const dropzones = document.querySelectorAll('.dropzone');
+      dropzones.forEach(zone => {
+        const rect = zone.getBoundingClientRect();
+        if (ev.clientX >= rect.left && ev.clientX <= rect.right &&
+            ev.clientY >= rect.top && ev.clientY <= rect.bottom) {
+          
+          if (!zone.classList.contains('correct')) {
+            if (zone.children.length > 0) {
+              wordBank.appendChild(zone.children[0]);
+            }
+            
+            zone.innerHTML = '';
+            zone.appendChild(el);
+            zone.classList.add('has-item');
+            dropped = true;
+          }
+        }
+      });
+
+      const bankRect = wordBank.getBoundingClientRect();
+      if (!dropped && ev.clientX >= bankRect.left && ev.clientX <= bankRect.right &&
+          ev.clientY >= bankRect.top && ev.clientY <= bankRect.bottom) {
+        
+        if (el.parentElement.classList.contains('dropzone')) {
+          el.parentElement.textContent = '...';
+          el.parentElement.classList.remove('has-item');
+        }
+        wordBank.appendChild(el);
+        dropped = true;
+      }
+
+      dropzones.forEach(zone => {
+        if (zone.children.length === 0) {
+          zone.textContent = '...';
+          zone.classList.remove('has-item');
+        }
+      });
+    }
+
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
+  });
+}
+
+function cekJawaban() {
+  const dropzones = document.querySelectorAll('.dropzone');
+  let benar = 0;
+  let totalSoal = dropzones.length;
+  let terisi = 0;
+  let wrongZones = [];
+
+  dropzones.forEach(zone => {
+    const chip = zone.querySelector('.chip');
+    if (chip) {
+      terisi++;
+      const jawabanUser = chip.dataset.kata;
+      const jawabanKunci = zone.dataset.jawaban;
+
+      if (jawabanUser === jawabanKunci) {
+        zone.classList.add('correct');
+        benar++;
+      } else {
+        zone.classList.add('wrong');
+        wrongZones.push({ zone, chip });
+      }
+    }
+  });
+
+  const resultBox = document.getElementById('result-box');
+
+  if (terisi < totalSoal) {
+    resultBox.style.display = 'block';
+    resultBox.style.color = '#D97706';
+    resultBox.textContent = '⚠️ Isilah semua titik-titik terlebih dahulu ya!';
+    wrongZones.forEach(item => item.zone.classList.remove('wrong'));
+    return;
+  }
+
+  if (benar === totalSoal) {
+    resultBox.style.display = 'none';
+    tampilkanModalApresiasi();
+  } else {
+    resultBox.style.display = 'block';
+    resultBox.style.color = 'var(--danger)';
+    resultBox.textContent = `💪 Ada jawaban yang belum tepat. Perhatikan kata yang kembali ke atas!`;
+
+    const btnCheck = document.getElementById('btn-check');
+    btnCheck.disabled = true;
+
+    setTimeout(() => {
+      wrongZones.forEach(item => {
+        item.zone.classList.remove('wrong', 'has-item');
+        item.zone.textContent = '...';
+        wordBank.appendChild(item.chip);
+      });
+      btnCheck.disabled = false;
+    }, 1200);
+  }
+}
+
+function resetWrongStylesOnly() {
+  document.querySelectorAll('.dropzone').forEach(zone => {
+    if (!zone.classList.contains('correct')) {
+      zone.classList.remove('wrong');
+    }
+  });
+  document.getElementById('result-box').style.display = 'none';
+}
+
+function tampilkanModalApresiasi() {
+  if (typeof confetti === 'function') {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+  }
+  document.getElementById('reward-modal').classList.add('active');
+}
+
+function prosesMainLagi() {
+  document.getElementById('reward-modal').classList.remove('active');
+
+  setTimeout(() => {
+    resetGameDengAnimasi();
+  }, 300);
+}
+
+/* FUNGSI REVISI TOTAL: ANIMASI TERBANG MULUS TANPA HILANG / KEDIP */
+function resetGameDengAnimasi() {
+  const activeChips = Array.from(document.querySelectorAll('.dropzone .chip'));
+
+  if (activeChips.length === 0) {
+    inisialisasiGame();
+    return;
+  }
+
+  document.getElementById('btn-check').disabled = true;
+
+  // 1. Kosongkan bank kata untuk menampung elemen baru nanti
+  wordBank.innerHTML = '';
+
+  // 2. Buat elemen tujuan di bank kata terlebih dahulu untuk mendapatkan koordinat target
+  const targetMap = [];
+  activeChips.forEach((chip) => {
+    const targetChip = document.createElement('div');
+    targetChip.className = 'chip';
+    targetChip.textContent = chip.textContent;
+    targetChip.dataset.kata = chip.dataset.kata;
+    targetChip.style.visibility = 'hidden'; // sembunyikan sementara
+    wordBank.appendChild(targetChip);
+
+    targetMap.push({
+      oldChip: chip,
+      targetChip: targetChip
+    });
+  });
+
+  // 3. Jalankan animasi terbang dari posisi asal ke posisi tujuan
+  let completed = 0;
+
+  targetMap.forEach((item, index) => {
+    setTimeout(() => {
+      const sourceRect = item.oldChip.getBoundingClientRect();
+      const targetRect = item.targetChip.getBoundingClientRect();
+
+      // Buat elemen penerbang (klon)
+      const flyer = document.createElement('div');
+      flyer.className = 'chip chip-fly';
+      flyer.textContent = item.oldChip.textContent;
+      flyer.style.left = `${sourceRect.left}px`;
+      flyer.style.top = `${sourceRect.top}px`;
+      flyer.style.width = `${sourceRect.width}px`;
+      flyer.style.height = `${sourceRect.height}px`;
+
+      document.body.appendChild(flyer);
+
+      // Sembunyikan chip lama di kotak pertanyaan secara instan tanpa merusak layout
+      item.oldChip.style.opacity = '0';
+      const parentZone = item.oldChip.parentElement;
+      if (parentZone) {
+        parentZone.textContent = '...';
+        parentZone.classList.remove('has-item', 'correct', 'wrong');
+      }
+
+      // Animasi meluncur ke target di bank kata
+      requestAnimationFrame(() => {
+        flyer.style.left = `${targetRect.left}px`;
+        flyer.style.top = `${targetRect.top}px`;
+        flyer.style.width = `${targetRect.width}px`;
+        flyer.style.height = `${targetRect.height}px`;
+      });
+
+      // Saat sampai di tujuan
+      setTimeout(() => {
+        flyer.remove();
+        item.targetChip.style.visibility = 'visible';
+        makeDraggable(item.targetChip);
+
+        completed++;
+        if (completed === targetMap.length) {
+          document.getElementById('btn-check').disabled = false;
+          renderSoal();
+          // Masukkan ulang chip ke bank kata yang baru diacak jika perlu
+          inisialisasiBankKata();
+        }
+      }, 500);
+
+    }, index * 120);
+  });
+
+  document.getElementById('result-box').style.display = 'none';
+}
+</script>
+
+</body>
+</html>
